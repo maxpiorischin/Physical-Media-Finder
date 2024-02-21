@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from app.services.Kijiji import getKijijiAds
+from app.services.BrowserManager import retry_async
 
 app = FastAPI()
 
@@ -11,7 +12,5 @@ async def root():
 
 @app.get("/kijiji/")
 async def kijiji(user_search: str, user_location: str):
-    print(longitude, latitude)
-    ads = await getKijijiAds("test", user_location)
-    print(ads)
-    return {"message": "This is the kijiji route"}
+    ads = await retry_async(getKijijiAds, 3, user_search, user_location)
+    return {"ads": ads}

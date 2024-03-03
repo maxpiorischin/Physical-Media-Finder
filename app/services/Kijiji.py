@@ -12,8 +12,8 @@ DEFAULT_TIMEOUT_LONG = 5000
 async def initialize(page: Page):
     return await page.goto(URL, wait_until="domcontentloaded")
 
-async def inputLocation(page: Page, user_location: str):
 
+async def input_location(page: Page, user_location: str):
     locationbutton = await page.wait_for_selector("#SearchLocationPicker")
     await locationbutton.click()
     await page.wait_for_timeout(DEFAULT_TIMEOUT)
@@ -26,10 +26,11 @@ async def inputLocation(page: Page, user_location: str):
     await apply_button.click()
     return page
 
-async def searchAds(page: Page, user_input: str):
+
+async def search_ads(page: Page, user_input: str):
     parsed_url = urlparse(page.url)
     query_components = parse_qs(parsed_url.query)
-    location = parsed_url.path.split('/')[-2][2:] #remove the b- from the location
+    location = parsed_url.path.split('/')[-2][2:]  # remove the b- from the location
 
     # Construct the new path
     new_path = f'/{DEFAULT_CATEGORY}/{location}/{user_input}/{DEFAULT_CODE}'
@@ -43,8 +44,9 @@ async def searchAds(page: Page, user_input: str):
 
     return page
 
-async def getAdsList(page: Page) -> list[dict[str, str]]:
-    ads = [] #list of ads
+
+async def get_ads_list(page: Page) -> list[dict[str, str]]:
+    ads = []  # list of ads
     titles = page.locator('[data-testid="listing-title"]')
     links = page.locator('[data-testid="listing-link"]')
     descriptions = page.locator('[data-testid="listing-description"]')
@@ -61,15 +63,14 @@ async def getAdsList(page: Page) -> list[dict[str, str]]:
     return ads
 
 
-
-async def getKijijiAds(user_input: str, user_location: str) -> list[dict[str, str]]:
+async def get_kijiji_ads(user_input: str, user_location: str) -> list[dict[str, str]]:
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         page = await newPage(browser)
         await initialize(page)
-        await inputLocation(page, user_location)
+        await input_location(page, user_location)
         await page.wait_for_timeout(DEFAULT_TIMEOUT_LONG)
-        await searchAds(page, user_input)
-        ads = await getAdsList(page)
+        await search_ads(page, user_input)
+        ads = await get_ads_list(page)
         await browser.close()
         return ads

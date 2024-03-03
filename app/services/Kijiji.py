@@ -1,5 +1,5 @@
 from playwright.async_api import async_playwright, Page
-from app.services.BrowserManager import newPage
+from app.services.Helpers import newPage
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
 
 URL = "https://www.kijiji.ca/"
@@ -16,12 +16,10 @@ async def initialize(page: Page):
 async def input_location(page: Page, user_location: str):
     locationbutton = await page.wait_for_selector("#SearchLocationPicker")
     await locationbutton.click()
-    await page.wait_for_timeout(DEFAULT_TIMEOUT)
     input_form = await page.wait_for_selector("#SearchLocationSelector-input")
     await input_form.fill(user_location)
     await page.wait_for_timeout(DEFAULT_TIMEOUT)
     await input_form.press("Enter")
-    await page.wait_for_timeout(DEFAULT_TIMEOUT)
     apply_button = page.locator("button:has-text('Apply')")
     await apply_button.click()
     return page

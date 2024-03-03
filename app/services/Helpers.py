@@ -1,3 +1,4 @@
+import re
 user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"
 
 async def newPage(browser):
@@ -25,3 +26,7 @@ async def retry_async(func, max_attempts=3, *args, **kwargs):
         except Exception as e:
             print(f"Attempt {attempt + 1} failed with error: {e}")
     return None
+
+async def valid_postal_code(postal_code):
+    postal_code_pattern = r'^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$'
+    return re.match(postal_code_pattern, postal_code)

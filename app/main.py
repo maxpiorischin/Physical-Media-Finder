@@ -1,15 +1,25 @@
 import os
 from fastapi import FastAPI, HTTPException
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from app.services.Kijiji import get_kijiji_ads
-from app.services.eBay import get_ebay_ads, set_ebay_api_key
+from app.services.eBay import get_ebay_ads, regenerate_ebay_token
 from app.services.Amazon import get_amazon_ads
 from app.services.Helpers import retry_async, valid_postal_code
 from dotenv import load_dotenv
 
 app = FastAPI()
+scheduler = AsyncIOScheduler()
 MAX_RETRIES = 3
-load_dotenv()
-set_ebay_api_key()
+
+
+@app.on_event("startup")
+async def startup():
+    load_dotenv()
+    await regenerate_ebay_token()
+    # Schedule to regenerate ebay token every 100 minutes since it only lasts 2 hours
+    scheduler.add_job(regenerate_ebay_token, IntervalTrigger(minutes=100))
+    scheduler.start()
 
 
 @app.get("/")

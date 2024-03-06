@@ -15,6 +15,7 @@ async def get_webpage(session, filled_link):
     await session.post(address_change_link, headers=headers,
                        data=post_data)  # change address using post request, then use bs4 to parse items
     webpage = await session.get(filled_link)
+    print("Connecting to:", filled_link)
     return await webpage.text()  # html content as a string
 
 
@@ -24,6 +25,7 @@ async def parse_webpage_into_ads(html: str, limit: int):
     items = soup.find_all(class_="template=SEARCH_RESULTS") #get the item container
     limit = min(abs(limit), len(items))  # if there are less ads than the limit
     i = 0 # index to parse through items
+    print(f"found {len(items)} ads")
     while limit > 0:
         item = items[i]
         image_tag = item.find('img')
@@ -31,8 +33,12 @@ async def parse_webpage_into_ads(html: str, limit: int):
         product_link_tag = item.find('a', class_=["a-link-normal", "s-underline-text", "s-underline-link-text", "s-link-style", "a-text-normal"])
         product_link = product_link_tag.get('href') if product_link_tag else ""
         description_tag = item.find(attrs={"data-cy": "title-recipe"})
-        title_header = description_tag.find_all('h2')[1] if description_tag else None #first one is the brand, second one is the title
-        title = title_header.find('span').text if title_header else ""
+        title_headers = description_tag.find_all('h2') if description_tag else None #first one is the brand, second one is the title
+        title = "" #this will hold the complete title including
+        for title_header in title_headers or []: #if None then empty list
+            title_component = title_header.find('span').text
+            if title_component:
+                title += f"{title_component} "
         price_tag = item.find('span', class_=["a-price"])
         price_tag_inner = price_tag.find('span') if price_tag else None
         price = price_tag_inner.text if price_tag_inner else ""
@@ -46,7 +52,6 @@ async def parse_webpage_into_ads(html: str, limit: int):
 
         limit -= 1
         i += 1
-
     return results
 
 

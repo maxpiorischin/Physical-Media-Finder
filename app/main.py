@@ -18,7 +18,7 @@ MAX_CHARACTER_LIMIT = 30 #Maximum user input character limit
 @app.on_event("startup")
 async def startup():
     load_dotenv()
-    await regenerate_ebay_token()
+    #await regenerate_ebay_token() todo remove
     # Schedule to regenerate ebay token every 100 minutes since it only lasts 2 hours
     scheduler.add_job(regenerate_ebay_token, IntervalTrigger(minutes=100))
     scheduler.start()

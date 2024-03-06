@@ -1,11 +1,12 @@
 from playwright.async_api import async_playwright, Page
 from app.services.Helpers import newPage
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
+import asyncio
 
 URL = "https://www.kijiji.ca/"
 DEFAULT_CATEGORY = "b-video-games-consoles"
 DEFAULT_CODE = "k0c141l1700212"
-DEFAULT_TIMEOUT = 1000
+DEFAULT_TIMEOUT = 1050
 DEFAULT_TIMEOUT_LONG = 5000
 
 
@@ -50,6 +51,7 @@ async def get_ads_list(page: Page, limit: int) -> list[dict[str, str]]:
     descriptions = page.locator('[data-testid="listing-description"]')
     locations = page.locator('[data-testid="listing-location"]')
     prices = page.locator('[data-testid="listing-price"]')
+    images = page.locator('[data-testid="listing-card-image"]')
     ads_count = await titles.count()
     for i in range(min(ads_count, limit)): #the smallest of either the limit or number of ads found
         title = await titles.nth(i).text_content()
@@ -57,7 +59,8 @@ async def get_ads_list(page: Page, limit: int) -> list[dict[str, str]]:
         description = await descriptions.nth(i).text_content()
         location = await locations.nth(i).text_content()
         price = await prices.nth(i).text_content()
-        ads.append({"title": title, "link": link, "description": description, "location": location, "price": price})
+        image_link = await images.nth(i).get_attribute("src")
+        ads.append({"title": title, "link": link, "price": price, "image_link": image_link, "description": description, "location": location})
     return ads
 
 

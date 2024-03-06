@@ -49,11 +49,10 @@ async def parse_ebay_listings(json_data):
         for item in json_data['itemSummaries']:
             # Relavent details
             listing = {
-                'itemId': item.get('itemId', ''),
                 'title': item.get('title', ''),
+                'link': item.get('itemWebUrl', ''),
                 'price': item.get('price', {}).get('value', '') + ' ' + item.get('price', {}).get('currency', ''),
-                'imageUrls': [image['imageUrl'] for image in item.get('thumbnailImages', [])],
-                'itemWebUrl': item.get('itemWebUrl', ''),
+                'image_links': [image['imageUrl'] for image in item.get('thumbnailImages', [])],
                 'itemLocation': item.get('itemLocation', {}).get('country', '') + ', ' + item.get('itemLocation',
                                                                                                   {}).get('postalCode',
                                                                                                           ''),

@@ -12,13 +12,13 @@ app = FastAPI()
 scheduler = AsyncIOScheduler()
 MAX_RETRIES = 3 #maximum number of retries before failing
 MAX_ADS_LIMIT = 10 #Maximum number of ads that can be requested
-MAX_CHARACTER_LIMIT = 20 #Maximum user input character limit
+MAX_CHARACTER_LIMIT = 30 #Maximum user input character limit
 
 
 @app.on_event("startup")
 async def startup():
     load_dotenv()
-    #await regenerate_ebay_token() todo uncomment this for ebay
+    await regenerate_ebay_token()
     # Schedule to regenerate ebay token every 100 minutes since it only lasts 2 hours
     scheduler.add_job(regenerate_ebay_token, IntervalTrigger(minutes=100))
     scheduler.start()
@@ -31,6 +31,7 @@ async def root():
 
 @app.get("/kijiji/")
 async def kijiji(user_search: str, user_location: str, limit: int = 10):
+    user_search = user_search.replace(" ", "-") #kijiji only takes dashes
     if not await valid_search(user_search, MAX_CHARACTER_LIMIT):
         raise HTTPException(status_code=400, detail="User search is improper, ensure it's less than 20 characters")
     if limit > MAX_ADS_LIMIT:
@@ -41,6 +42,7 @@ async def kijiji(user_search: str, user_location: str, limit: int = 10):
 
 @app.get("/amazon/")
 async def amazon(user_search: str, user_postal_code: str, limit: int = 10):
+    user_search = user_search.replace(" ", "+")
     if not await valid_postal_code(user_postal_code):
         raise HTTPException(status_code=400, detail="Invalid Postal Code")
     if not await valid_search(user_search, MAX_CHARACTER_LIMIT):
@@ -53,6 +55,7 @@ async def amazon(user_search: str, user_postal_code: str, limit: int = 10):
 
 @app.get("/ebay/")
 async def ebay(user_search: str, limit: int = 10):
+    user_search = user_search.replace(" ", "+")
     if not await valid_search(user_search, MAX_CHARACTER_LIMIT):
         raise HTTPException(status_code=400, detail="User search is improper, ensure it's less than 20 characters")
     if limit > MAX_ADS_LIMIT:

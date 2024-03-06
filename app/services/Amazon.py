@@ -30,10 +30,12 @@ async def parse_webpage_into_ads(html: str, limit: int):
         image_link = image_tag.get('src') if image_tag else ""
         product_link_tag = item.find('a', class_=["a-link-normal", "s-underline-text", "s-underline-link-text", "s-link-style", "a-text-normal"])
         product_link = product_link_tag.get('href') if product_link_tag else ""
-        title_tag = product_link_tag.find('span')
-        title = title_tag.text if title_tag else ""
-        price_tag = item.find('span', class_=["a-price"]).find('span')
-        price = price_tag.text if price_tag else ""
+        description_tag = item.find(attrs={"data-cy": "title-recipe"})
+        title_header = description_tag.find_all('h2')[1] if description_tag else None #first one is the brand, second one is the title
+        title = title_header.find('span').text if title_header else ""
+        price_tag = item.find('span', class_=["a-price"])
+        price_tag_inner = price_tag.find('span') if price_tag else None
+        price = price_tag_inner.text if price_tag_inner else ""
         listing = {
             "title": title,
             "link": product_link,
@@ -49,7 +51,7 @@ async def parse_webpage_into_ads(html: str, limit: int):
 
 
 async def get_amazon_ads(user_input: str, user_postal_code: str, limit: int):
-    user_input = user_input.replace(" ", "+")  # the reason these lines are not abstracted into another function is
+    # the reason these lines are not abstracted into another function is
     # because Windows has a known issue with aiohttp and async event loops when it comes to ClientSession,
     # so the main called function is the one which initiates the session for simplicity
     filled_link = f"{base_link}s?field-keywords={user_input}"

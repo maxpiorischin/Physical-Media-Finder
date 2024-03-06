@@ -19,11 +19,33 @@ async def get_webpage(session, filled_link):
 
 
 async def parse_webpage_into_ads(html: str, limit: int):
+    results = []
     soup = BeautifulSoup(html, 'html.parser')
-    # get the amount of search results found on amazon
-    search_results_amount = len(soup.find_all(class_="template=SEARCH_RESULTS"))
-    limit = min(limit, search_results_amount)  # if there are less ads than
-    return [f"{search_results_amount}{soup}"]
+    items = soup.find_all(class_="template=SEARCH_RESULTS") #get the item container
+    limit = min(abs(limit), len(items))  # if there are less ads than the limit
+    i = 0 # index to parse through items
+    while limit > 0:
+        item = items[i]
+        image_tag = item.find('img')
+        image_link = image_tag.get('src') if image_tag else ""
+        product_link_tag = item.find('a', class_=["a-link-normal", "s-underline-text", "s-underline-link-text", "s-link-style", "a-text-normal"])
+        product_link = product_link_tag.get('href') if product_link_tag else ""
+        title_tag = product_link_tag.find('span')
+        title = title_tag.text if title_tag else ""
+        price_tag = item.find('span', class_=["a-price"]).find('span')
+        price = price_tag.text if price_tag else ""
+        listing = {
+            "title": title,
+            "link": product_link,
+            "price": price,
+            "image_link": image_link
+            }
+        results.append(listing)
+
+        limit -= 1
+        i += 1
+
+    return results
 
 
 async def get_amazon_ads(user_input: str, user_postal_code: str, limit: int):
@@ -35,4 +57,4 @@ async def get_amazon_ads(user_input: str, user_postal_code: str, limit: int):
     async with aiohttp.ClientSession() as session:
         html = await get_webpage(session, filled_link)
         ads = await parse_webpage_into_ads(html, limit) #this must stay in here if it wants to reference html, otherwise a windows socket error occurs (known aiohttp bug)
-        return [ads]
+        return ads

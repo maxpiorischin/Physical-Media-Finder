@@ -35,3 +35,6 @@ async def retry_async(func, max_attempts=3, delay=1, *args, **kwargs):
 async def valid_postal_code(postal_code):
     postal_code_pattern = r'^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$'
     return re.match(postal_code_pattern, postal_code)
+
+async def valid_search(user_search, character_limit = 20): #simple for validating the user search
+    return len(user_search) < character_limit

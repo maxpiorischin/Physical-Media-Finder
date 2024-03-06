@@ -67,14 +67,15 @@ async def parse_ebay_listings(json_data):
     return parsed_listings
 
 
-async def get_ebay_ads(user_input):
+async def get_ebay_ads(user_input, limit=DEFAULT_LIMIT):
     """
     Using request headers containing a generated ebay api key, search canadian ebay API for the user specified item
+    :param limit: limit of how many ads
     :param user_input: the item which the user is searching for
     :return: json of ads
     """
     async with aiohttp.ClientSession() as session:
-        link = f"{EBAY_API_URL}?q={user_input}&limit={DEFAULT_LIMIT}" #link with user input and limit of items
+        link = f"{EBAY_API_URL}?q={user_input}&limit={limit}" #link with user input and limit of items
         try:
             response = await session.get(link, headers=request_headers)
             response.raise_for_status()  # Raises HTTPStatusError bad reqs

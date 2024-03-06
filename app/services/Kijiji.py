@@ -43,7 +43,7 @@ async def search_ads(page: Page, user_input: str):
     return page
 
 
-async def get_ads_list(page: Page) -> list[dict[str, str]]:
+async def get_ads_list(page: Page, limit: int) -> list[dict[str, str]]:
     ads = []  # list of ads
     titles = page.locator('[data-testid="listing-title"]')
     links = page.locator('[data-testid="listing-link"]')
@@ -51,7 +51,7 @@ async def get_ads_list(page: Page) -> list[dict[str, str]]:
     locations = page.locator('[data-testid="listing-location"]')
     prices = page.locator('[data-testid="listing-price"]')
     ads_count = await titles.count()
-    for i in range(ads_count):
+    for i in range(min(ads_count, limit)): #the smallest of either the limit or number of ads found
         title = await titles.nth(i).text_content()
         link = await links.nth(i).get_attribute("href")
         description = await descriptions.nth(i).text_content()
@@ -61,7 +61,7 @@ async def get_ads_list(page: Page) -> list[dict[str, str]]:
     return ads
 
 
-async def get_kijiji_ads(user_input: str, user_location: str) -> list[dict[str, str]]:
+async def get_kijiji_ads(user_input: str, user_location: str, limit: int) -> list[dict[str, str]]:
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         page = await newPage(browser)
@@ -69,6 +69,6 @@ async def get_kijiji_ads(user_input: str, user_location: str) -> list[dict[str, 
         await input_location(page, user_location)
         await page.wait_for_timeout(DEFAULT_TIMEOUT_LONG)
         await search_ads(page, user_input)
-        ads = await get_ads_list(page)
+        ads = await get_ads_list(page, limit)
         await browser.close()
         return ads

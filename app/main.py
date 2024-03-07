@@ -1,5 +1,5 @@
-import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from app.services.Kijiji import get_kijiji_ads
@@ -13,6 +13,19 @@ scheduler = AsyncIOScheduler()
 MAX_RETRIES = 3 #maximum number of retries before failing
 MAX_ADS_LIMIT = 10 #Maximum number of ads that can be requested
 MAX_CHARACTER_LIMIT = 30 #Maximum user input character limit
+
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")

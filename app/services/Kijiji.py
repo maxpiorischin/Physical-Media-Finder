@@ -66,7 +66,7 @@ async def get_ads_list(page: Page, limit: int) -> list[dict[str, str]]:
 
 async def get_kijiji_ads(user_input: str, user_location: str, limit: int) -> list[dict[str, str]]:
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch()
         page = await newPage(browser)
         await initialize(page)
         await input_location(page, user_location)

@@ -24,10 +24,9 @@
 {#if $ads.length > 0}
   <div class="ads-container mt-4">
     {#each $ads as ad (ad.link)}
-        {console.log(ad.image_link)}
       <div class="ad bg-gray-100 rounded-lg p-4 shadow my-2">
         <div class="ad-image">
-          <img src={ad.image_links[0] || 'src/assets/image_not_found.jpg'} alt={ad.title} class="rounded w-32 h-auto">
+          <img src={ad.image_links || 'src/assets/image_not_found.jpg'} alt={ad.title} class="rounded w-40 h-auto">
         </div>
         <div class="ad-info mt-2">
           <p class="ad-title font-bold">{ad.title}</p>

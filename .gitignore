@@ -3,3 +3,12 @@
 /venv/
 *.pyc
 .idea
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+**/node_modules/
